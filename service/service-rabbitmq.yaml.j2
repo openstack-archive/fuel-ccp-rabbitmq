@@ -1,0 +1,11 @@
+kind: "Service"
+apiVersion: "v1"
+metadata:
+  name: "rabbitmq-service"
+spec:
+  selector:
+    app: "rabbitmq"
+  ports:
+    -
+      protocol: "TCP"
+      port: 5672
