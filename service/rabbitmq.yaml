@@ -1,0 +1,20 @@
+service:
+    name: rabbitmq
+    ports:
+        - rabbitmq_port
+    probes:
+        readiness: "true"
+        liveness: "true"
+    daemon:
+        files:
+            - rabbitmq-conf
+            - erlang-cookie
+        command: rabbitmq-server
+files:
+    rabbitmq-conf:
+        path: /etc/rabbitmq/rabbitmq.config
+        content: rabbitmq.config.j2
+    erlang-cookie:
+        path: /var/lib/rabbitmq/.erlang.cookie
+        content: erlang.cookie
+        perm: "400"

@@ -1,0 +1,11 @@
+[
+  {rabbit, [
+    {tcp_listeners, [
+      {"0.0.0.0", {{ rabbitmq_port }} }
+    ]},
+    {default_user, <<"{{ rabbitmq_user }}">>},
+    {default_pass, <<"{{ rabbitmq_password }}">>},
+    {cluster_partition_handling, autoheal}
+  ]}
+].
+% EOF

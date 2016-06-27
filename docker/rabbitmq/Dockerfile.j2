@@ -7,16 +7,10 @@ RUN apt-get install -y --no-install-recommends \
 
 RUN rm -rf /var/lib/rabbitmq/*
 
-COPY rabbitmq.config /etc/rabbitmq/
-COPY start.sh /usr/local/bin/start.sh
 COPY rabbitmq_sudoers /etc/sudoers.d/rabbitmq_sudoers
-RUN chmod 755 /usr/local/bin/start.sh \
-    && chmod 750 /etc/sudoers.d \
+RUN chmod 750 /etc/sudoers.d \
     && chmod 440 /etc/sudoers.d/rabbitmq_sudoers \
-    && usermod -a -G microservices rabbitmq
-
-ENV RABBITMQ_CLUSTER_COOKIE "password"
+    && usermod -a -G microservices rabbitmq \
+    && chown -R rabbitmq: /var/lib/rabbitmq /var/log/rabbitmq /etc/rabbitmq
 
 USER rabbitmq
-
-CMD ["start.sh"]
