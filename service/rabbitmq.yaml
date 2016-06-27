@@ -2,6 +2,9 @@ service:
     name: rabbitmq
     ports:
         - rabbitmq_port
+    container:
+        node-selector:
+            openstack-controller: "true"
     probes:
         readiness: "true"
         liveness: "true"
