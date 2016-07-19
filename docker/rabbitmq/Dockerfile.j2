@@ -3,9 +3,8 @@ MAINTAINER {{ maintainer }}
 
 RUN apt-get install -y --no-install-recommends \
     rabbitmq-server \
-    && apt-get clean
-
-RUN rm -rf /var/lib/rabbitmq/*
+    && apt-get clean \
+    && rm -rf /var/lib/rabbitmq/*
 
 COPY rabbitmq_sudoers /etc/sudoers.d/rabbitmq_sudoers
 RUN chmod 750 /etc/sudoers.d \
