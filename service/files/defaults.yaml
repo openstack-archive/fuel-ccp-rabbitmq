@@ -4,3 +4,7 @@ configs:
     external_port: 32672
     password: password
     user: rabbitmq
+
+    # How many seconds we give a node before making liveness checks
+    # completely strict
+    node_startup_timeout: 180
