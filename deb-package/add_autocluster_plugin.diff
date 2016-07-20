@@ -1,0 +1,12 @@
+--- a/Makefile
++++ b/Makefile
+@@ -7,7 +7,8 @@ PACKAGES_DIR ?= $(abspath PACKAGES)
+ DEPS = rabbit_common rabbit $(PLUGINS)
+ 
+ # List of plugins to include in a RabbitMQ release.
+-PLUGINS := rabbitmq_amqp1_0 \
++PLUGINS := autocluster rabbitmq_aws \
++	   rabbitmq_amqp1_0 \
+ 	   rabbitmq_auth_backend_ldap \
+ 	   rabbitmq_auth_mechanism_ssl \
+ 	   rabbitmq_consistent_hash_exchange \

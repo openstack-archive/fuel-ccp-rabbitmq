@@ -1,0 +1,25 @@
+diff -ur rabbitmq-server-3.6.5.905.orig/debian/rules rabbitmq-server-3.6.5.905/debian/rules
+--- rabbitmq-server-3.6.5.905.orig/debian/rules	2016-10-07 09:25:25.000000000 +0300
++++ rabbitmq-server-3.6.5.905/debian/rules	2016-10-18 16:40:36.832241775 +0300
+@@ -16,6 +16,8 @@
+ 	$(MAKE) clean distclean-manpages
+ 
+ override_dh_auto_build:
++	ln -s ../autocluster deps/autocluster
++	ln -s ../aws deps/rabbitmq_aws
+ 	$(MAKE) dist manpages
+ 
+ override_dh_auto_test:
+@@ -27,10 +29,10 @@
+ override_dh_auto_install: RMQ_ROOTDIR = $(PREFIX)/lib/rabbitmq
+ override_dh_auto_install: RMQ_ERLAPP_DIR = $(RMQ_ROOTDIR)/lib/rabbitmq_server-$(VERSION)
+ override_dh_auto_install:
+-	dh_auto_install
++	dh_auto_install -- VERSION=$(VERSION)
+ 
+-	$(MAKE) install-bin DESTDIR=$(DEB_DESTDIR)
++	$(MAKE) install-bin DESTDIR=$(DEB_DESTDIR) VERSION=$(VERSION)
+ 
+ 	sed -e 's|@RABBIT_LIB@|$(RMQ_ERLAPP_DIR)|g' \
+ 		< debian/postrm.in > debian/postrm
+ 

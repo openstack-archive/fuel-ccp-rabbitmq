@@ -1,15 +1,33 @@
 FROM {{ namespace }}/base-tools:{{ tag }}
 MAINTAINER {{ maintainer }}
 
+# XXX Should go away when we will use erlang and rabbit from proper APT repository
+{% set erlang_deps = 'libwxbase3.0-0 libwxgtk3.0-0' %}
+{% set rabbit_run_deps = 'socat logrotate' %}
 RUN apt-get install -y --no-install-recommends \
-    rabbitmq-server \
-    && apt-get clean \
-    && rm -rf /var/lib/rabbitmq/*
+  {{ erlang_deps }} {{ rabbit_run_deps }} \
+  && apt-get clean
+
+# XXX We want at least 18.3.4, due to fixed mnesia bugs. Here we using
+# version from erlang solutions, but maybe we should backport from
+# debian unstable instead.
+RUN curl --silent --show-error -Lo /tmp/erlang.deb https://packages.erlang-solutions.com/erlang/esl-erlang/FLAVOUR_1_general/esl-erlang_18.3.4-1~debian~jessie_amd64.deb \
+ && dpkg -i /tmp/erlang.deb \
+ && rm -f /tmp/erlang.deb
+
+# XXX We need at least ver 3.6.6 with embedded autocluster plugin. Built with scripts from deb-package/ in this repository, but we need to publish it in more official fashion.
+RUN curl --silent --show-error -Lo /tmp/rabbitmq-server.deb https://github.com/binarin/rabbitmq-autocluster/releases/download/health-check-rc1/rabbitmq-server_3.6.5.905-1_all.deb \
+  && dpkg -i /tmp/rabbitmq-server.deb \
+  && rm -rf /tmp/rabbitmq-server.deb /var/lib/rabbitmq/*
+
+# XXX Shouldn't this happen in some base image?
+RUN pip --no-cache-dir install --upgrade requests python-etcd
 
 COPY rabbitmq_sudoers /etc/sudoers.d/rabbitmq_sudoers
+
 RUN chmod 750 /etc/sudoers.d \
     && chmod 440 /etc/sudoers.d/rabbitmq_sudoers \
     && usermod -a -G microservices rabbitmq \
-    && chown -R rabbitmq: /var/lib/rabbitmq /var/log/rabbitmq /etc/rabbitmq
+    && chown -R rabbitmq: /var/lib/rabbitmq /etc/rabbitmq
 
 USER rabbitmq
