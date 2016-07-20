@@ -11,10 +11,12 @@ service:
         readiness: "true"
         liveness: "true"
       daemon:
+        dependencies:
+          - etcd
         files:
           - rabbitmq-conf
           - erlang-cookie
-        command: rabbitmq-server
+        command: /start-rabbit
 files:
   rabbitmq-conf:
     path: /etc/rabbitmq/rabbitmq.config
