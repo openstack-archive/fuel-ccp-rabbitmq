@@ -1,15 +1,50 @@
 FROM {{ namespace }}/base-tools:{{ tag }}
 MAINTAINER {{ maintainer }}
 
-RUN apt-get install -y --no-install-recommends \
-    rabbitmq-server \
-    && apt-get clean \
-    && rm -rf /var/lib/rabbitmq/*
+ENV GENERAL_DEPS wget
+ENV ERLANG_DEPS libwxbase3.0-0 libwxgtk3.0-0
+# XXX Before autocluster and fixed rabbit is properly packaged
+ENV RABBIT_BUILD_DEPS zip xsltproc xmlto unzip python-simplejson make git rsync dpkg-dev build-essential debhelper dh-systemd
+ENV RABBIT_RUN_DEPS socat logrotate
 
+RUN apt-get install -y --no-install-recommends \
+  $GENERAL_DEPS $ERLANG_DEPS $RABBIT_BUILD_DEPS $RABBIT_RUN_DEPS \
+  && apt-get clean
+
+RUN wget --quiet https://packages.erlang-solutions.com/erlang/esl-erlang/FLAVOUR_1_general/esl-erlang_18.3.4-1~debian~jessie_amd64.deb -O /tmp/erlang.deb \
+ && dpkg -i /tmp/erlang.deb \
+ && rm -f /tmp/erlang.deb
+
+# RUN wget --quiet https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_4_milestone2/rabbitmq-server_3.6.3.902-1_all.deb -O /tmp/rabbitmq-server.deb \
+#  && dpkg -i /tmp/rabbitmq-server.deb \
+#  && rm -rf /tmp/rabbitmq-server.deb /var/lib/rabbitmq/*
+
+COPY fetch-from-github /fetch-from-github
+
+# Build & install rabbit from source
+RUN /fetch-from-github binarin   rabbitmq-server                   37d4fc789d89a1ff981bd8d771013014b4d05147 /tmp/ra \
+ && make -C /tmp/ra current_rmq_ref=stable base_rmq_ref=stable package-deb UNOFFICIAL_RELEASE=1 VERSION=3.6.4 \
+ && dpkg -i /tmp/ra/PACKAGES/*.deb
+
+# Build and install autocluster plugin from source
+RUN /fetch-from-github aweber    rabbitmq-autocluster 52228799cd9fc881c13e4b8359f286b15f6ea41d /tmp/ac \
+ && /fetch-from-github rabbitmq  rabbitmq-server      b6a3aa477156036c129d04a82c90ad916bc3865e /tmp/ac/deps/rabbit \
+ && /fetch-from-github rabbitmq  rabbitmq-common      73e16c86381a41c7f06b482f468a4f1a741aacdd /tmp/ac/deps/rabbit_common \
+ && /fetch-from-github gmr       rabbitmq-aws         38eccbee0f5f1a26841dd413418cef4233f8cd55 /tmp/ac/deps/rabbitmq_aws \
+ && /fetch-from-github rabbitmq  rabbitmq-codegen     95ca8b68a38a0612086ddd725eabef2ea340fed5 /tmp/ac/deps/rabbitmq_codegen \
+ && /fetch-from-github ninenines ranch                a5d2efcde9a34ad38ab89a26d98ea5335e88625a /tmp/ac/deps/ranch \
+ && make -C /tmp/ac \
+ && make -C /tmp/ac dist IGNORE_DEPS=rabbit \
+ && cp -v /tmp/ac/plugins/autocluster-*.ez /tmp/ac/plugins/rabbitmq_aws-*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-*/plugins/ \
+ && rm -rf /tmp/ac
+
+# XXX Who needs this sudoers entries?
 COPY rabbitmq_sudoers /etc/sudoers.d/rabbitmq_sudoers
 RUN chmod 750 /etc/sudoers.d \
     && chmod 440 /etc/sudoers.d/rabbitmq_sudoers \
     && usermod -a -G microservices rabbitmq \
     && chown -R rabbitmq: /var/lib/rabbitmq /var/log/rabbitmq /etc/rabbitmq
+
+COPY start.sh /start-rabbit
 
 USER rabbitmq
