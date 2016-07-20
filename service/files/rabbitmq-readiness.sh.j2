@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -eu
+set -o pipefail
+exec 1>/proc/1/fd/2 2>/proc/1/fd/2
+
+source $(readlink -f $(dirname $0))/rabbitmq-check-helpers.sh
+set-log-prefix "readiness:$$"
+log-it "Starting readiness probe at $(date +'%Y-%m-%d %H:%M:%S')"
+
+main() {
+    if ! ping-node; then
+        log-it "Node is not pingable"
+        return 1
+    fi
+    if ! is-node-healthy; then
+        log-it "Node is unhealthy"
+        return 1
+    fi
+    if ! is-node-properly-clustered; then
+        log-it "Node is inconsistent with the rest of the cluster"
+        return 1
+    fi
+    return 0
+}
+
+if main; then
+    rc=0
+else
+    rc=$?
+fi
+log-it "Ready to return $rc"

@@ -1,14 +1,61 @@
 FROM {{ namespace }}/base-tools:{{ tag }}
 MAINTAINER {{ maintainer }}
 
+
+# XXX Needed for erlang-solutions erlang package
+{% set erlang_deps = 'libwxbase3.0-0 libwxgtk3.0-0' %}
+
+# XXX Needed as we are building autocluster plugin from source
+{% set rabbit_build_deps = 'zip xsltproc xmlto unzip python-simplejson make git rsync dpkg-dev debhelper dh-systemd build-essential' %}
+
+{% set rabbit_run_deps = 'socat logrotate' %}
+
 RUN apt-get install -y --no-install-recommends \
-    rabbitmq-server \
-    && apt-get clean \
-    && rm -rf /var/lib/rabbitmq/*
+  {{ erlang_deps }} {{ rabbit_build_deps }} {{ rabbit_run_deps }} \
+  && apt-get clean
+
+# XXX We want at least 18.3.4, due to fixed mnesia bugs. Here we using
+# version from erlang solutions, but maybe we should backport from
+# debian unstable instead.
+RUN curl --silent --show-error -Lo /tmp/erlang.deb https://packages.erlang-solutions.com/erlang/esl-erlang/FLAVOUR_1_general/esl-erlang_18.3.4-1~debian~jessie_amd64.deb \
+ && dpkg -i /tmp/erlang.deb \
+ && rm -f /tmp/erlang.deb
+
+# XXX We need at least ver 3.6.6 for this patch https://github.com/rabbitmq/rabbitmq-server/pull/892
+# But it is not released yet
+RUN curl -Lo /tmp/rabbitmq-server.deb https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_6_milestone5/rabbitmq-server_3.6.5.905-1_all.deb \
+  && dpkg -i /tmp/rabbitmq-server.deb \
+  && rm -rf /tmp/rabbitmq-server.deb /var/lib/rabbitmq/*
+
+RUN pip --no-cache-dir install --upgrade requests python-etcd
+
+COPY fetch-from-github /fetch-from-github
+
+# Build & install rabbit from source
+#RUN /fetch-from-github binarin   rabbitmq-server      37d4fc789d89a1ff981bd8d771013014b4d05147 /tmp/ra \
+# && make -C /tmp/ra rabbitmq-components-mk \
+# && make -C /tmp/ra current_rmq_ref=stable base_rmq_ref=stable package-deb UNOFFICIAL_RELEASE=1 VERSION=3.6.4 \
+# && dpkg -i /tmp/ra/PACKAGES/*.deb
+
+# XXX Build and install autocluster plugin from our own branch, before
+# https://github.com/aweber/rabbitmq-autocluster/pull/98 is merged upstream.
+RUN /fetch-from-github binarin   rabbitmq-autocluster startup-locking-support                  /tmp/ac \
+ && /fetch-from-github rabbitmq  rabbitmq-server      29a12b6be5744efb0dd270411b3ad112096fc4e6 /tmp/ac/deps/rabbit \
+ && /fetch-from-github rabbitmq  rabbitmq-common      9788f162967aed7e6649422d2fae9ee429920746 /tmp/ac/deps/rabbit_common \
+ && /fetch-from-github gmr       rabbitmq-aws         38eccbee0f5f1a26841dd413418cef4233f8cd55 /tmp/ac/deps/rabbitmq_aws \
+ && /fetch-from-github rabbitmq  rabbitmq-codegen     95ca8b68a38a0612086ddd725eabef2ea340fed5 /tmp/ac/deps/rabbitmq_codegen \
+ && /fetch-from-github ninenines ranch                a5d2efcde9a34ad38ab89a26d98ea5335e88625a /tmp/ac/deps/ranch \
+ && make -C /tmp/ac \
+ && make -C /tmp/ac dist IGNORE_DEPS=rabbit \
+ && cp -v /tmp/ac/plugins/autocluster-*.ez /tmp/ac/plugins/rabbitmq_aws-*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-*/plugins/ \
+ && rm -rf /tmp/ac
 
 COPY rabbitmq_sudoers /etc/sudoers.d/rabbitmq_sudoers
+
+COPY start.sh /start-rabbit
 RUN chmod 750 /etc/sudoers.d \
     && chmod 440 /etc/sudoers.d/rabbitmq_sudoers \
+    && chmod 755 /start-rabbit \
     && usermod -a -G microservices rabbitmq \
     && chown -R rabbitmq: /var/lib/rabbitmq /var/log/rabbitmq /etc/rabbitmq
 
