@@ -1,0 +1,14 @@
+{
+    "users":[
+        {"name":"{{ rabbitmq_user }}","password":"{{ rabbitmq_password }}","tags":"administrator"}
+    ],
+    "permissions":[
+        {"user":"{{ rabbitmq_user }}","vhost":"/","configure":".*","write":".*","read":".*"}
+    ],
+    "vhosts":[
+        {"name":"/"}
+    ],
+    "policies":[
+        {"vhost":"/","name":"ha","pattern":"", "definition":{"ha-mode":"all","ha-sync-mode":"automatic","ha-sync-batch-size":5}}
+    ]
+}
