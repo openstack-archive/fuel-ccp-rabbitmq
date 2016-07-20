@@ -1,11 +1,31 @@
 [
-  {rabbit, [
-    {tcp_listeners, [
-      {"0.0.0.0", {{ rabbitmq_port }} }
-    ]},
-    {default_user, <<"{{ rabbitmq_user }}">>},
-    {default_pass, <<"{{ rabbitmq_password }}">>},
-    {cluster_partition_handling, autoheal}
-  ]}
+   {rabbit, [
+      {dummy_param_without_comma, true}
+     ,{tcp_listeners, [
+        {"0.0.0.0", {{ rabbitmq_port }} }
+      ]}
+     ,{loopback_users, []}
+     ,{cluster_partition_handling, pause_minority}
+     ,{log_levels, [{autocluster, debug}, {connection, info}]}
+     ,{queue_master_locator, <<"random">>}
+   ]}
+  ,{rabbitmq_management, [
+      {dummy_param_without_comma, true}
+     ,{listener, [{port, 15672}]}
+     ,{http_log_dir, "/var/log/ccp/rabbitmq"}]
+  }
+  ,{autocluster, [
+      {dummy_param_without_comma, true}
+     ,{backend, etcd}
+     ,{startup_delay, 30}
+     ,{autocluster_failure, stop}
+     ,{cleanup_interval, 60}
+     ,{cluster_cleanup, true}
+     ,{cleanup_warn_only, false}
+     ,{etcd_ttl, 15}
+     ,{etcd_scheme, http}
+     ,{etcd_host, "etcd"}
+     ,{etcd_port, {{ etcd_client_port }}}
+   ]}
 ].
 % EOF
