@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+import socket
+
+import requests
+import etcd
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--debug', action='store_true')
+args = parser.parse_args()
+
+IP = socket.gethostbyname(socket.gethostname())
+URL = 'http://127.0.0.1:15672/api/nodes/rabbit@%s' % IP
+etcd_client = etcd.Client(host='etcd', port=2379, allow_reconnect=True,
+                          read_timeout=2)
+
+# Fetching cluster status from API
+r = requests.get(URL, auth=('rabbitmq', 'password'))
+if r.status_code != 200:
+    if args.debug:
+        print("API call failed, status code is: %s" % r.status_code)
+        print(r.text)
+    sys.exit(1)
+
+data = r.json()
+
+api_result = set([ node['peer_addr'] for node in data['cluster_links'] ])
+# Adding ourselfs to this set
+api_result.add(IP)
+
+# Fetching cluster status from etcd
+rbmq_nodes_etcd = etcd_client.get('/rabbitmq/default')
+etcd_result = set([ node.key.rsplit('@')[-1] for node in rbmq_nodes_etcd.children if node.key.rsplit('@')[-1] != 'IP' ])
+
+if args.debug:
+    print("Api nodes set: %s" % api_result)
+    print("Etcd nodes set: %s" % etcd_result)
+    print("Sets are equal: %s" % (api_result == etcd_result))
+
+if api_result == etcd_result:
+   sys.exit(0)
+else:
+   sys.exit(1)
+
