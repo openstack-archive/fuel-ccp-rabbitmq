@@ -4,4 +4,9 @@ configs:
       cont: 5672
       node: 32672
     password: password
+    erlang_cookie: erlang_cookie
     user: rabbitmq
+
+    # How many seconds we give a node before making liveness checks
+    # completely strict
+    node_startup_timeout: 180

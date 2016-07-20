@@ -1,15 +1,46 @@
 FROM {{ image_spec("base-tools") }}
 MAINTAINER {{ maintainer }}
 
-RUN apt-get install -y --no-install-recommends \
-    rabbitmq-server \
-    && apt-get clean \
-    && rm -rf /var/lib/rabbitmq/*
+# Choosing erlang version explicity, so we will not have a lot of GUI libraries
+{% set erlang_deps = 'erlang-nox erlang-base-hipe' %}
+
+# Needed for building rabbitmq and/or plugins
+{% set rabbit_build_deps = 'zip xsltproc xmlto unzip python-simplejson make git rsync dpkg-dev debhelper dh-systemd build-essential erlang-dev erlang-src' %}
+
+# Runtime deps of rabbitmq
+{% set rabbit_run_deps = 'socat logrotate' %}
+
+# Manually managing dependencies, as we don't yet have APT repos with proper versions
+# of erlang, rabbitmq and autocluster.
+RUN apt-get install -t jessie-backports -y --no-install-recommends \
+  {{ erlang_deps }} {{ rabbit_build_deps }} {{ rabbit_run_deps }} \
+  && apt-get clean
+
+# We need at least 3.6.6, as it'll contain https://github.com/rabbitmq/rabbitmq-server/pull/892
+RUN curl -Lo /tmp/rabbitmq-server.deb https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_6_milestone5/rabbitmq-server_3.6.5.905-1_all.deb \
+  && dpkg -i /tmp/rabbitmq-server.deb \
+  && rm -rf /tmp/rabbitmq-server.deb /var/lib/rabbitmq/*
+
+COPY fetch-from-github /fetch-from-github
+
+# Build and install autocluster plugin from our own branch, before
+# https://github.com/aweber/rabbitmq-autocluster/pull/98 is merged upstream.
+RUN /fetch-from-github Mirantis  rabbitmq-autocluster health-check-v1                          /tmp/ac \
+ && /fetch-from-github rabbitmq  rabbitmq-server      29a12b6be5744efb0dd270411b3ad112096fc4e6 /tmp/ac/deps/rabbit \
+ && /fetch-from-github rabbitmq  rabbitmq-common      9788f162967aed7e6649422d2fae9ee429920746 /tmp/ac/deps/rabbit_common \
+ && /fetch-from-github gmr       rabbitmq-aws         38eccbee0f5f1a26841dd413418cef4233f8cd55 /tmp/ac/deps/rabbitmq_aws \
+ && /fetch-from-github rabbitmq  rabbitmq-codegen     95ca8b68a38a0612086ddd725eabef2ea340fed5 /tmp/ac/deps/rabbitmq_codegen \
+ && /fetch-from-github ninenines ranch                a5d2efcde9a34ad38ab89a26d98ea5335e88625a /tmp/ac/deps/ranch \
+ && make -C /tmp/ac \
+ && make -C /tmp/ac dist IGNORE_DEPS=rabbit \
+ && cp -v /tmp/ac/plugins/autocluster-*.ez /tmp/ac/plugins/rabbitmq_aws-*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-*/plugins/ \
+ && rm -rf /tmp/ac
 
 COPY rabbitmq_sudoers /etc/sudoers.d/rabbitmq_sudoers
+
 RUN chmod 750 /etc/sudoers.d \
     && chmod 440 /etc/sudoers.d/rabbitmq_sudoers \
     && usermod -a -G microservices rabbitmq \
-    && chown -R rabbitmq: /var/lib/rabbitmq /var/log/rabbitmq /etc/rabbitmq
+    && chown -R rabbitmq: /var/lib/rabbitmq /etc/rabbitmq
 
 USER rabbitmq
