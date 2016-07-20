@@ -1,2 +1,3 @@
-NODENAME=rabbitmq
+NODENAME=rabbit@{{ network_topology["private"]["address"] }}
+USE_LONGNAME=true
 RABBITMQ_LOG_BASE=/var/log/ccp/rabbitmq
