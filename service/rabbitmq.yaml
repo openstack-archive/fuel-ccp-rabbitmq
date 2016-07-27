@@ -2,8 +2,6 @@ service:
   name: rabbitmq
   ports:
     - rabbitmq_port
-  node-selector:
-    openstack-controller: "true"
   containers:
     - name: rabbitmq
       image: rabbitmq
