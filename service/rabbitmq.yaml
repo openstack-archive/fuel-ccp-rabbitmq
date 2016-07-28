@@ -8,15 +8,27 @@ service:
       probes:
         readiness: "true"
         liveness: "true"
+      volumes:
+      - name: rabbitmq-logs
+        path: "{{ rabbitmq_log_base }}"
+        type: host
+        readOnly: False
+      pre:
+        - name: chown-logs-dir
+          command: "sudo /bin/chown rabbitmq: {{ rabbitmq_log_base }}"
       daemon:
         files:
           - rabbitmq-conf
+          - rabbitmq-env
           - erlang-cookie
         command: rabbitmq-server
 files:
   rabbitmq-conf:
     path: /etc/rabbitmq/rabbitmq.config
     content: rabbitmq.config.j2
+  rabbitmq-env:
+    path: /etc/rabbitmq/rabbitmq-env.conf
+    content: rabbitmq-env.conf.j2
   erlang-cookie:
     path: /var/lib/rabbitmq/.erlang.cookie
     content: erlang.cookie
