@@ -10,12 +10,12 @@ service:
         liveness: "true"
       volumes:
       - name: rabbitmq-logs
-        path: "{{ rabbitmq_log_base }}"
+        path: "/var/log/ccp/rabbitmq"
         type: host
         readOnly: False
       pre:
         - name: chown-logs-dir
-          command: "sudo /bin/chown rabbitmq: {{ rabbitmq_log_base }}"
+          command: "sudo /bin/chown rabbitmq: /var/log/ccp/rabbitmq"
       daemon:
         files:
           - rabbitmq-conf
