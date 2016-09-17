@@ -9,10 +9,10 @@ service:
         readiness: "true"
         liveness: "true"
       volumes:
-      - name: rabbitmq-logs
-        path: "/var/log/ccp/rabbitmq"
-        type: host
-        readOnly: False
+        - name: rabbitmq-logs
+          path: "/var/log/ccp/rabbitmq"
+          type: host
+          readOnly: False
       pre:
         - name: chown-logs-dir
           command: "sudo /bin/chown rabbitmq: /var/log/ccp/rabbitmq"
