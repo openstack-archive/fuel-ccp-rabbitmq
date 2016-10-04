@@ -1,6 +1,9 @@
 [
   {rabbit, [
     {tcp_listeners, [
+      {% if enable_murano %}
+      {"0.0.0.0", {{ murano_rabbitmq_port }} },
+      {% endif %}
       {"0.0.0.0", {{ rabbitmq_port }} }
     ]},
     {default_user, <<"{{ rabbitmq_user }}">>},
