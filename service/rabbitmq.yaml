@@ -2,6 +2,9 @@ service:
   name: rabbitmq
   ports:
     - {{ rabbitmq_port }}
+    {% if enable_murano %}
+    - {{ murano_rabbitmq_port }}:{{ murano_rabbitmq_node_port }}
+    {% endif %}
   containers:
     - name: rabbitmq
       image: rabbitmq
