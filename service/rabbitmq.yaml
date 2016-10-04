@@ -1,7 +1,7 @@
 service:
   name: rabbitmq
   ports:
-    - {{ rabbitmq_port }}
+    - {{ rabbitmq_port }}:{{ rabbitmq_external_port }}
   containers:
     - name: rabbitmq
       image: rabbitmq
