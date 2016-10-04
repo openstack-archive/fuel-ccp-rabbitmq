@@ -1,4 +1,5 @@
 configs:
     rabbitmq_port: 5672
+    rabbitmq_external_port: 32672
     rabbitmq_password: password
     rabbitmq_user: rabbitmq
