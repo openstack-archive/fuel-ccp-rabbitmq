@@ -1,1 +1,1 @@
-{{ rabbitmq_password }}
+{{ rabbitmq.password }}

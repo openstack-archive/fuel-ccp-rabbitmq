@@ -1,10 +1,10 @@
 [
   {rabbit, [
     {tcp_listeners, [
-      {"0.0.0.0", {{ rabbitmq_port }} }
+      {"0.0.0.0", {{ rabbitmq.port }} }
     ]},
-    {default_user, <<"{{ rabbitmq_user }}">>},
-    {default_pass, <<"{{ rabbitmq_password }}">>},
+    {default_user, <<"{{ rabbitmq.user }}">>},
+    {default_pass, <<"{{ rabbitmq.password }}">>},
     {cluster_partition_handling, autoheal}
   ]}
 ].
