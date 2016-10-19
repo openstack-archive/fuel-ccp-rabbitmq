@@ -1,6 +1,7 @@
 configs:
   rabbitmq:
-    port: 5672
-    external_port: 32672
+    port:
+      cont: 5672
+      node: 32672
     password: password
     user: rabbitmq
