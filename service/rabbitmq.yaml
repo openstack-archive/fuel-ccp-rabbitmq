@@ -7,7 +7,9 @@ service:
       image: rabbitmq
       probes:
         readiness: "true"
-        liveness: "true"
+        liveness:
+          command: "true"
+          type: "exec"
       volumes:
         - name: rabbitmq-logs
           path: "/var/log/ccp/rabbitmq"
