@@ -14,7 +14,7 @@ RUN apt-get install -t jessie-backports -y --no-install-recommends \
   && apt-get clean
 
 # We need at least 3.6.6, as it'll contain https://github.com/rabbitmq/rabbitmq-server/pull/892
-RUN curl -Lo /tmp/rabbitmq-server.deb https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_6_rc2/rabbitmq-server_3.6.5.907-1_all.deb \
+RUN curl -Lo /tmp/rabbitmq-server.deb https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_6/rabbitmq-server_3.6.6-1_all.deb \
   && dpkg -i /tmp/rabbitmq-server.deb \
   && rm -rf /tmp/rabbitmq-server.deb /var/lib/rabbitmq/*
 
