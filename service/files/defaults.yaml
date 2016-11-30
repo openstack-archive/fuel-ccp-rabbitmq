@@ -1,4 +1,10 @@
 configs:
+  messaging:
+    backend:
+      rpc: rabbitmq
+      notifications: rabbitmq
+    dependencies:
+      rabbitmq: rabbitmq
   rabbitmq:
     port:
       cont: 5672
