@@ -1,0 +1,8 @@
+{% macro rabbit(cfg_type) -%}
+{% if cfg_type == 'rpc_config' -%}
+  [DEFAULT]
+{%- else -%}
+  [oslo_messaging_notifications]
+{%- endif %}
+transport_url=rabbit://{{ rabbitmq.user }}:{{ rabbitmq.password }}@{{ address('rabbitmq') }}
+{%- endmacro %}
