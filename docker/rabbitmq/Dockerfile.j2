@@ -14,12 +14,12 @@ RUN apt-get install -t jessie-backports -y --no-install-recommends \
   && apt-get clean
 
 # We need at least 3.6.6, as it'll contain https://github.com/rabbitmq/rabbitmq-server/pull/892
-RUN curl -Lo /tmp/rabbitmq-server.deb https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_6/rabbitmq-server_3.6.6-1_all.deb \
+RUN curl -Lo /tmp/rabbitmq-server.deb {{ rabbitmq.url.provider }}/rabbitmq-server_{{ rabbitmq.version }}_all.deb \
   && dpkg -i /tmp/rabbitmq-server.deb \
   && rm -rf /tmp/rabbitmq-server.deb /var/lib/rabbitmq/*
 
 # `cp` is needed until https://github.com/rabbitmq/rabbitmq-server/pull/1016 is merged
-RUN curl -Lo /tmp/rabbitmq-autocluster.deb https://github.com/Mirantis/rabbitmq-autocluster/releases/download/0.6.1.950/rabbitmq-autocluster_0.6.1.950-1_all.deb \
+RUN curl -Lo /tmp/rabbitmq-autocluster.deb {{ autocluster.url.provider }}/rabbitmq-autocluster_{{ autocluster.version }}_all.deb \
   && dpkg -i /tmp/rabbitmq-autocluster.deb \
   && cp -v /usr/lib/rabbitmq/plugins/*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-*/plugins/
 
