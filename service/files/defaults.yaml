@@ -11,13 +11,15 @@ configs:
     # completely strict
     node_startup_timeout: 180
 
-    url:
-      #provider: https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_6/
-      provider: https://artifactory.mcp.mirantis.net/sandbox-github-local
-    version: 3.6.6-1
-
+url:
+  rabbitmq:
+    debian:
+      repo: http://www.rabbitmq.com/debian/
+      keyserver: hkps.pool.sks-keyservers.net
+      keyid: 6B73A36E6026DFCA
   autocluster:
-    url:
-      #provider: https://github.com/Mirantis/rabbitmq-autocluster/releases/download/0.6.1.950/
-      provider: https://artifactory.mcp.mirantis.net/sandbox-github-local
-    version: 0.6.1.950-1
+    provider: https://github.com/Mirantis/rabbitmq-autocluster/releases/download/0.6.1.950
+
+versions:
+  rabbitmq_version: "3.6.6-1"
+  autocluster_version: "0.6.1.950-1"

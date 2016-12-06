@@ -14,12 +14,15 @@ RUN apt-get install -t jessie-backports -y --no-install-recommends \
   && apt-get clean
 
 # We need at least 3.6.6, as it'll contain https://github.com/rabbitmq/rabbitmq-server/pull/892
-RUN curl -Lo /tmp/rabbitmq-server.deb {{ rabbitmq.url.provider }}/rabbitmq-server_{{ rabbitmq.version }}_all.deb \
-  && dpkg -i /tmp/rabbitmq-server.deb \
-  && rm -rf /tmp/rabbitmq-server.deb /var/lib/rabbitmq/*
+COPY {{ render('sources.list.debian.j2') }} /etc/apt/sources.list.d/rabbitmq.list
+RUN apt-key adv --recv-keys --keyserver {{ url.rabbitmq.debian.keyserver }} \
+  {{ url.rabbitmq.debian.keyid }} \
+  && apt-get update \
+  && apt-get install -y rabbitmq-server={{ rabbitmq_version }} \
+  && rm -rf /var/lib/rabbitmq/*
 
 # `cp` is needed until https://github.com/rabbitmq/rabbitmq-server/pull/1016 is merged
-RUN curl -Lo /tmp/rabbitmq-autocluster.deb {{ autocluster.url.provider }}/rabbitmq-autocluster_{{ autocluster.version }}_all.deb \
+RUN curl -Lo /tmp/rabbitmq-autocluster.deb {{ url.autocluster.provider }}/rabbitmq-autocluster_{{ autocluster_version }}_all.deb \
   && dpkg -i /tmp/rabbitmq-autocluster.deb \
   && cp -v /usr/lib/rabbitmq/plugins/*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-*/plugins/
 
