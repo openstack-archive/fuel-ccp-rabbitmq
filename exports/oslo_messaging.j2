@@ -4,5 +4,5 @@
 {%- elif cfg_type == 'notifications_config' -%}
   [oslo_messaging_notifications]
 {%- endif %}
-transport_url=rabbit://{{ rabbitmq.user }}:{{ rabbitmq.password }}@{{ address('rabbitmq') }}
+transport_url=rabbit://{{ rabbitmq.user }}:{{ rabbitmq.password }}@{{ address('rabbitmq', rabbitmq.port) }}
 {%- endmacro %}
