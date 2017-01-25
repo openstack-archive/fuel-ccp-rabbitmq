@@ -20,6 +20,11 @@ service:
       pre:
         - name: chown-logs-dir
           command: "sudo /bin/chown rabbitmq: /var/log/ccp/rabbitmq"
+      env:
+        - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+          value: "-pa /usr/lib/erlang/lib/ssl-8.0.3/ebin -proto_dist inet_tls -ssl_dist_opt server_certfile /etc/ccp/rabbitmq.pem -ssl_dist_opt server_secure_renegotiate true client_secure_renegotiate true server_cacertfile /etc/ccp/ca.pem"
+        - name: RABBITMQ_CTL_ERL_ARGS
+          value: "-pa /usr/lib/erlang/lib/ssl-8.0.3/ebin -proto_dist inet_tls -ssl_dist_opt server_certfile /etc/ccp/rabbitmq.pem -ssl_dist_opt server_secure_renegotiate true client_secure_renegotiate true server_cacertfile /etc/ccp/ca.pem"
       daemon:
         dependencies:
           - etcd
@@ -32,6 +37,12 @@ service:
           - rabbitmq-readiness
           - rabbitmq-liveness
           - rabbitmq-check-helpers
+        {% if security.tls.enabled %}
+          - server_certificate
+          - server_key
+          - ca_certificate
+          - combined
+        {% endif %}
       post:
         - name: create-startup-marker
           command: "date +%s > /tmp/rabbit-startup-marker"
@@ -61,3 +72,17 @@ files:
     path: /opt/ccp/bin/rabbitmq-check-helpers.sh
     content: rabbitmq-check-helpers.sh.j2
     perm: "644"
+{% if security.tls.enabled %}
+  server_certificate:
+    path: /etc/ccp/rabbitmq_certificate.pem
+    content: server.pem
+  server_key:
+    path: /etc/ccp/rabbitmq_server_key.pem
+    content: server-key.pem
+  ca_certificate:
+    path: /etc/ccp/ca.pem
+    content: ca.pem
+  combined:
+    path: /etc/ccp/rabbitmq.pem
+    content: rabbitmq_combined.pem
+{% endif %}
