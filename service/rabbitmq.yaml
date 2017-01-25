@@ -32,6 +32,12 @@ service:
           - rabbitmq-readiness
           - rabbitmq-liveness
           - rabbitmq-check-helpers
+        #  {% if security.tls.enabled %}
+          - server_certificate
+          - server_key
+          - ca_certificate
+          - combined
+        # {% endif %}
       post:
         - name: create-startup-marker
           command: "date +%s > /tmp/rabbit-startup-marker"
@@ -61,3 +67,21 @@ files:
     path: /opt/ccp/bin/rabbitmq-check-helpers.sh
     content: rabbitmq-check-helpers.sh.j2
     perm: "644"
+# {% if security.tls.enabled %}
+  server_certificate:
+    path: /etc/ccp/rabbitmq_certificate.pem
+    content: server.pem.j2
+    perm: "0600"
+  server_key:
+    path: /etc/ccp/rabbitmq_server_key.pem
+    content: server-key.pem.j2
+    perm: "0600"
+  ca_certificate:
+    path: /etc/ccp/ca.pem
+    content: ca.pem.j2
+    perm: "0600"
+  combined:
+    path: /etc/ccp/rabbitmq.pem
+    content: rabbitmq_combined.pem.j2
+    perm: "0600"
+# {% endif %}
