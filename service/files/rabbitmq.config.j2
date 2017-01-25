@@ -1,7 +1,12 @@
 [
    {rabbit, [
       {dummy_param_without_comma, true}
+     {% if not security.tls.enabled %}
      ,{tcp_listeners, [
+     {% else %}
+     ,{tcp_listeners, [] }
+     ,{ssl_listeners, [
+     {% endif %}
         {"0.0.0.0", {{ rabbitmq.port.cont }} }
       ]}
      ,{default_user, <<"{{ rabbitmq.user }}">>}
@@ -9,6 +14,11 @@
      ,{loopback_users, []}
      ,{cluster_partition_handling, pause_minority}
      ,{queue_master_locator, <<"random">>}
+     ,{ssl_options, [{cacertfile,"/etc/ccp/ca.pem"},
+                    {certfile,"/etc/ccp/rabbitmq_certificate.pem"},
+                    {keyfile,"/etc/ccp/rabbitmq_server_key.pem"},
+                    {verify,verify_peer},
+                    {fail_if_no_peer_cert,false}]}
    ]}
   ,{autocluster, [
       {dummy_param_without_comma, true}
@@ -18,8 +28,12 @@
      ,{cluster_cleanup, true}
      ,{cleanup_warn_only, false}
      ,{etcd_ttl, 15}
+    {% if not security.tls.enabled %}
      ,{etcd_scheme, http}
-     ,{etcd_host, "etcd"}
+    {% else %}
+     ,{etcd_scheme, https}
+    {% endif %}
+     ,{etcd_host, "{{ address('etcd') }}"}
      ,{etcd_port, {{ etcd.client_port.cont }}}
    ]}
 ].
