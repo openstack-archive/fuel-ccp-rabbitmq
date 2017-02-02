@@ -7,11 +7,14 @@ MAINTAINER {{ maintainer }}
 # Runtime deps of rabbitmq
 {% set rabbit_run_deps = 'socat logrotate' %}
 
+COPY {{ render('backports.sources.list.debian.j2') }} /etc/apt/sources.list.d/backports.list
+
 # Manually managing dependencies, as we don't yet have APT repos with proper versions
 # of rabbitmq and autocluster.
-RUN apt-get install -t jessie-backports -y --no-install-recommends \
-  {{ erlang_deps }} {{ rabbit_run_deps }} \
-  && apt-get clean
+RUN apt-get update \
+    && apt-get install -t jessie-backports -y --no-install-recommends \
+        {{ erlang_deps }} {{ rabbit_run_deps }} \
+    && apt-get clean
 
 # We need at least 3.6.6, as it'll contain https://github.com/rabbitmq/rabbitmq-server/pull/892
 COPY {{ render('sources.list.debian.j2') }} /etc/apt/sources.list.d/rabbitmq.list
