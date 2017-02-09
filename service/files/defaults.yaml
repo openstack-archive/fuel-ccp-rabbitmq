@@ -12,6 +12,8 @@ configs:
     password: password
     erlang_cookie: erlang_cookie
     user: rabbitmq
+    tls:
+      enabled: true
 
     # How many seconds we give a node before making liveness checks
     # completely strict
