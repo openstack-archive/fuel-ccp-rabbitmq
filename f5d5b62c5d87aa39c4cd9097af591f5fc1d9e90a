@@ -1,0 +1,10 @@
+Code-Review+2: Aleksandr Mogylchenko <amogylchenko@mirantis.com>
+Code-Review+1: Sergii Golovatiuk <sgolovatiuk@mirantis.com>
+Code-Review+2: Artur Zarzycki <azarzycki@mirantis.com>
+Workflow+1: Artur Zarzycki <azarzycki@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 13 Feb 2017 10:23:46 +0000
+Reviewed-on: https://review.openstack.org/431558
+Project: openstack/fuel-ccp-rabbitmq
+Branch: refs/heads/master
