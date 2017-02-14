@@ -32,7 +32,7 @@ service:
           - rabbitmq-readiness
           - rabbitmq-liveness
           - rabbitmq-check-helpers
-        # {% if security.tls.enabled %}
+        # {% if rabbitmq.tls.enabled or etcd.tls.enabled %}
           - server_certificate
           - server_key
           - ca_certificate
@@ -67,7 +67,7 @@ files:
     path: /opt/ccp/bin/rabbitmq-check-helpers.sh
     content: rabbitmq-check-helpers.sh.j2
     perm: "644"
-# {% if security.tls.enabled %}
+# {% if rabbitmq.tls.enabled or etcd.tls.enabled %}
   server_certificate:
     path: /opt/ccp/etc/tls/rabbitmq_certificate.pem
     content: server.pem.j2
