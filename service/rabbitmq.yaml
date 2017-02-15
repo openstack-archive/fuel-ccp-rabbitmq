@@ -1,7 +1,7 @@
-dsl_version: 0.1.0
+dsl_version: 0.5.0
 service:
   name: rabbitmq
-  kind: DaemonSet
+  antiAffinity: local
   ports:
     - {{ rabbitmq.port }}
   containers:
