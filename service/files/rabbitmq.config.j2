@@ -14,7 +14,7 @@
      ,{default_user, <<"{{ rabbitmq.user }}">>}
      ,{default_pass, <<"{{ rabbitmq.password }}">>}
      ,{loopback_users, []}
-     ,{cluster_partition_handling, pause_minority}
+     ,{cluster_partition_handling, ignore}
      ,{queue_master_locator, <<"random">>}
      {% if rabbitmq.tls.enabled %}
      ,{ssl_options, [{cacertfile,"/opt/ccp/etc/tls/ca.pem"},
