@@ -6,13 +6,6 @@
 {%- endif %}
 transport_url=rabbit://{{ rabbitmq.user }}:{{ rabbitmq.password }}@{{ address('rabbitmq', rabbitmq.port) }}
 
-{% if rabbitmq.tls.enabled %}
-[oslo_messaging_rabbit]
-kombu_ssl_version="TLSv1_2"
-rabbit_use_ssl = true
-kombu_ssl_ca_certs = /opt/ccp/etc/tls/ca.pem
-{% endif %}
-
 {%- endmacro %}
 
 {% macro rabbit_tls() -%}
