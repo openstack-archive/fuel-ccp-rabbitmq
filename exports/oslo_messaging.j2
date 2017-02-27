@@ -1,10 +1,11 @@
 {% macro rabbit(cfg_type) -%}
 {% if cfg_type == 'rpc_config' -%}
-  [DEFAULT]
+[DEFAULT]
+transport_url=rabbit://{{ rabbitmq.user }}:{{ rabbitmq.password }}@{{ address('rpc', rabbitmq.port) }}
 {%- elif cfg_type == 'notifications_config' -%}
-  [oslo_messaging_notifications]
+[oslo_messaging_notifications]
+transport_url=rabbit://{{ rabbitmq.user }}:{{ rabbitmq.password }}@{{ address('notifications', rabbitmq.port) }}
 {%- endif %}
-transport_url=rabbit://{{ rabbitmq.user }}:{{ rabbitmq.password }}@{{ address('rabbitmq', rabbitmq.port) }}
 
 {% if rabbitmq.tls.enabled %}
 [oslo_messaging_rabbit]

@@ -8,7 +8,6 @@ configs:
   rabbitmq:
     port:
       cont: 5672
-      node: 32672
     password: password
     erlang_cookie: erlang_cookie
     user: rabbitmq
