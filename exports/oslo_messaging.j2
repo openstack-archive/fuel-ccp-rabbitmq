@@ -1,10 +1,6 @@
-{% macro rabbit(cfg_type) -%}
-{% if cfg_type == 'rpc_config' -%}
-  [DEFAULT]
-{%- elif cfg_type == 'notifications_config' -%}
-  [oslo_messaging_notifications]
-{%- endif %}
+{% macro rabbit_transport() -%}
 transport_url=rabbit://{{ rabbitmq.user }}:{{ rabbitmq.password }}@{{ address('rabbitmq', rabbitmq.port) }}
+{%- endmacro %}
 
 {% if rabbitmq.tls.enabled %}
 [oslo_messaging_rabbit]
