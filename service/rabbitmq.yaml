@@ -20,6 +20,9 @@ service:
       pre:
         - name: chown-logs-dir
           command: "sudo /bin/chown rabbitmq: /var/log/ccp/rabbitmq"
+      pre:
+        - name: render-memory-limit
+          command: "/opt/ccp/bin/render-memory-limit.py --src=/etc/rabbitmq/rabbitmq.config.j2 --dst=/etc/rabbitmq/rabbitmq.config"
       daemon:
         dependencies:
           - etcd
@@ -32,6 +35,7 @@ service:
           - rabbitmq-readiness
           - rabbitmq-liveness
           - rabbitmq-check-helpers
+          - render-memory-limit
         # {% if rabbitmq.tls.enabled or etcd.tls.enabled %}
           - server_certificate
           - server_key
@@ -43,7 +47,7 @@ service:
           command: "date +%s > /tmp/rabbit-startup-marker"
 files:
   rabbitmq-conf:
-    path: /etc/rabbitmq/rabbitmq.config
+    path: /etc/rabbitmq/rabbitmq.config.j2
     content: rabbitmq.config.j2
   rabbitmq-env-conf:
     path: /etc/rabbitmq/rabbitmq-env.conf
@@ -67,6 +71,10 @@ files:
     path: /opt/ccp/bin/rabbitmq-check-helpers.sh
     content: rabbitmq-check-helpers.sh.j2
     perm: "644"
+  render-memory-limit:
+    path: /opt/ccp/bin/render-memory-limit.py
+    content: render_memory_limit.py
+    perm: "755"
 # {% if rabbitmq.tls.enabled or etcd.tls.enabled %}
   server_certificate:
     path: /opt/ccp/etc/tls/rabbitmq_certificate.pem

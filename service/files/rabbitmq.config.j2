@@ -23,6 +23,9 @@
                     {verify,verify_peer},
                     {fail_if_no_peer_cert,false}]}
      {% endif %}
+     {% raw %}
+     ,{vm_memory_high_watermark, {absolute, {{ vm_memory_high_watermark }}}}
+     {% endraw %}
    ]}
   ,{autocluster, [
       {dummy_param_without_comma, true}
