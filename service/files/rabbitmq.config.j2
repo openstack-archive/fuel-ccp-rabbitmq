@@ -23,6 +23,7 @@
                     {verify,verify_peer},
                     {fail_if_no_peer_cert,false}]}
      {% endif %}
+     ,{vm_memory_high_watermark, {absolute, {{ (MEMORY_LIMIT|int * rabbitmq.high_watermark_ratio)|int }}}}
    ]}
   ,{autocluster, [
       {dummy_param_without_comma, true}
