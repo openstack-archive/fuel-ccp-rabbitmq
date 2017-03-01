@@ -18,6 +18,7 @@ configs:
     # How many seconds we give a node before making liveness checks
     # completely strict
     node_startup_timeout: 180
+    high_watermark_ratio: 0.75
 
 url:
   rabbitmq:
