@@ -6,9 +6,6 @@ configs:
   rabbitmq:
     port:
       cont: 5672
-    password: password
-    erlang_cookie: erlang_cookie
-    user: rabbitmq
     tls:
       enabled: true
 
@@ -16,6 +13,12 @@ configs:
     # completely strict
     node_startup_timeout: 180
     high_watermark_ratio: 0.75
+
+secret_configs:
+  rabbitmq:
+    password: password
+    erlang_cookie: erlang_cookie
+    user: rabbitmq
 
 url:
   rabbitmq:
