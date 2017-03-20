@@ -30,5 +30,5 @@ url:
     provider: https://github.com/Mirantis/rabbitmq-autocluster/releases/download/0.6.1.950
 
 versions:
-  rabbitmq_version: "3.6.7-1"
+  rabbitmq_version: "3.6.8-1"
   autocluster_version: "0.6.1.950-1"
