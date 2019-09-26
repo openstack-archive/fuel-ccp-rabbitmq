@@ -1,1 +1,0 @@
-%microservices ALL=(root) NOPASSWD: /bin/chown -R rabbitmq\: /var/lib/rabbitmq, /bin/chown -R rabbitmq\: /etc/rabbitmq, /bin/chown rabbitmq\: /var/log/ccp/rabbitmq
